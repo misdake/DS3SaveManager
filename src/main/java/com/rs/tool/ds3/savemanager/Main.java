@@ -9,13 +9,41 @@ import javax.swing.WindowConstants;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
-    private static final File saveFile   = new File("C:\\Users\\zzx\\AppData\\Roaming\\DarkSoulsIII\\0140000100000001\\DS30000.sl2");
+    private static       File saveFile;
     private static final File backupFile = new File("backup.sl2");
 
     public static void main(String[] args) {
+        File saveFolder = new File(System.getProperty("user.home") + "\\AppData\\Roaming\\DarkSoulsIII\\");
+        System.out.println(saveFolder);
+
+        List<File> candidates = new ArrayList<>();
+
+        if (saveFolder.exists()) {
+            File[] files = saveFolder.listFiles(file -> file.isDirectory() && file.getName().matches("[0-9]+"));
+            if (files != null) for (File file : files) {
+                File saveFile = new File(file.getAbsoluteFile() + "\\DS30000.sl2");
+                if (saveFile.exists()) {
+                    candidates.add(file);
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            //TODO tell user
+        } else if (candidates.size() > 1) {
+            //TODO let user select one
+        } else {
+            saveFile = candidates.get(0);
+        }
+
+        if (saveFile == null) {
+            return;
+        }
+
         JIntellitype.getInstance().registerHotKey(1, "F1");
         JIntellitype.getInstance().registerHotKey(2, "F2");
 
