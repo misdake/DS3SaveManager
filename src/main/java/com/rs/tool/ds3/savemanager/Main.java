@@ -13,12 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static       File saveFile;
-    private static final File backupFile = new File("backup.sl2");
+    private static File saveFile;
+
+    private static final File backupFile = new File("backups\\backup.sl2");
+    static {
+    }
 
     public static void main(String[] args) {
-        File saveFolder = new File(System.getProperty("user.home") + "\\AppData\\Roaming\\DarkSoulsIII\\");
-        System.out.println(saveFolder);
+        File saveFolder = new File(System.getenv("AppData") + "\\DarkSoulsIII\\");
+        new File("backups").mkdirs();
 
         List<File> candidates = new ArrayList<>();
 
@@ -27,7 +30,7 @@ public class Main {
             if (files != null) for (File file : files) {
                 File saveFile = new File(file.getAbsoluteFile() + "\\DS30000.sl2");
                 if (saveFile.exists()) {
-                    candidates.add(file);
+                    candidates.add(saveFile);
                 }
             }
         }
@@ -41,8 +44,11 @@ public class Main {
         }
 
         if (saveFile == null) {
+            System.out.println("未确定存档，退出");
             return;
         }
+
+        System.out.println("使用存档: " + saveFile.getAbsoluteFile());
 
         JIntellitype.getInstance().registerHotKey(1, "F1");
         JIntellitype.getInstance().registerHotKey(2, "F2");
