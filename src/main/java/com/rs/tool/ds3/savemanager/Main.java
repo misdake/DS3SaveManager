@@ -3,21 +3,19 @@ package com.rs.tool.ds3.savemanager;
 import com.melloware.jintellitype.JIntellitype;
 import sun.audio.AudioPlayer;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static File saveFile;
+    private static File saveFile = null;
 
     private static final File backupFile = new File("backups\\backup.sl2");
-    static {
-    }
 
     public static void main(String[] args) {
         File saveFolder = new File(System.getenv("AppData") + "\\DarkSoulsIII\\");
@@ -36,13 +34,38 @@ public class Main {
         }
 
         if (candidates.isEmpty()) {
-            //TODO tell user
+            JOptionPane.showMessageDialog(null, "未找到存档，将退出");
+            System.exit(-1);
         } else if (candidates.size() > 1) {
-            //TODO let user select one
+            JDialog dialog = new JDialog();
+            dialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent windowEvent) {
+                    if (saveFile == null) {
+                        System.exit(0);
+                    }
+                }
+            });
+            dialog.setTitle("选择存档");
+            JList<File> list = new JList<>();
+            list.setListData(candidates.toArray(new File[0]));
+            list.addListSelectionListener(event -> {
+                int index = event.getFirstIndex();
+                saveFile = candidates.get(index);
+                dialog.dispose();
+                start();
+            });
+            dialog.add(list);
+            dialog.setVisible(true);
+            dialog.pack();
         } else {
             saveFile = candidates.get(0);
+            start();
         }
 
+    }
+
+    private static void start() {
         if (saveFile == null) {
             System.out.println("未确定存档，退出");
             return;
