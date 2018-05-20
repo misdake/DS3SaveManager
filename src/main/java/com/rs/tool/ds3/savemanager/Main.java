@@ -13,11 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static File saveFile = null;
-
-    private static final File backupFile = new File("backups\\backup.sl2");
 
     public static void main(String[] args) {
+        File backupFile = new File("backups\\backup.sl2");
+
         File saveFolder = new File(System.getenv("AppData") + "\\DarkSoulsIII\\");
         new File("backups").mkdirs();
 
@@ -26,9 +25,9 @@ public class Main {
         if (saveFolder.exists()) {
             File[] files = saveFolder.listFiles(file -> file.isDirectory() && file.getName().matches("[0-9]+"));
             if (files != null) for (File file : files) {
-                File saveFile = new File(file.getAbsoluteFile() + "\\DS30000.sl2");
-                if (saveFile.exists()) {
-                    candidates.add(saveFile);
+                File s = new File(file.getAbsoluteFile() + "\\DS30000.sl2");
+                if (s.exists()) {
+                    candidates.add(s);
                 }
             }
         }
@@ -37,11 +36,12 @@ public class Main {
             JOptionPane.showMessageDialog(null, "未找到存档，将退出");
             System.exit(-1);
         } else if (candidates.size() > 1) {
+            boolean[] selected = {false};
             JDialog dialog = new JDialog();
             dialog.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent windowEvent) {
-                    if (saveFile == null) {
+                    if (!selected[0]) {
                         System.exit(0);
                     }
                 }
@@ -51,21 +51,22 @@ public class Main {
             list.setListData(candidates.toArray(new File[0]));
             list.addListSelectionListener(event -> {
                 int index = event.getFirstIndex();
-                saveFile = candidates.get(index);
+                File saveFile = candidates.get(index);
+                selected[0] = true;
                 dialog.dispose();
-                start();
+                start(saveFile, backupFile);
             });
             dialog.add(list);
             dialog.setVisible(true);
             dialog.pack();
         } else {
-            saveFile = candidates.get(0);
-            start();
+            File saveFile = candidates.get(0);
+            start(saveFile, backupFile);
         }
 
     }
 
-    private static void start() {
+    private static void start(File saveFile, File backupFile) {
         if (saveFile == null) {
             System.out.println("未确定存档，退出");
             return;
@@ -79,10 +80,10 @@ public class Main {
         JIntellitype.getInstance().addHotKeyListener(bindingIndex -> {
             switch (bindingIndex) {
                 case 1:
-                    backup();
+                    backup(saveFile, backupFile);
                     break;
                 case 2:
-                    restore();
+                    restore(backupFile, saveFile);
                     break;
             }
         });
@@ -99,11 +100,11 @@ public class Main {
         frame.add(restoreButton);
         frame.pack();
 
-        backupButton.addActionListener(actionEvent -> backup());
-        backupButton.addActionListener(actionEvent -> restore());
+        backupButton.addActionListener(actionEvent -> backup(saveFile, backupFile));
+        restoreButton.addActionListener(actionEvent -> restore(backupFile, saveFile));
     }
 
-    private static void backup() {
+    private static void backup(File saveFile, File backupFile) {
         boolean success = FileUtil.copy(saveFile, backupFile);
         if (success) {
             try {
@@ -114,7 +115,7 @@ public class Main {
             }
         }
     }
-    private static void restore() {
+    private static void restore(File backupFile, File saveFile) {
         boolean success = FileUtil.copy(backupFile, saveFile);
         if (success) {
             try {
@@ -125,4 +126,5 @@ public class Main {
             }
         }
     }
+
 }
