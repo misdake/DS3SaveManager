@@ -23,7 +23,7 @@ public class Main {
         List<File> candidates = new ArrayList<>();
 
         if (saveFolder.exists()) {
-            File[] files = saveFolder.listFiles(file -> file.isDirectory() && file.getName().matches("[0-9]+"));
+            File[] files = saveFolder.listFiles(file -> file.isDirectory() && file.getName().matches("[0-9a-zA-Z]+"));
             if (files != null) for (File file : files) {
                 File s = new File(file.getAbsoluteFile() + "\\DS30000.sl2");
                 if (s.exists()) {
